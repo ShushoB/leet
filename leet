@@ -1,0 +1,61 @@
+import tkinter as tk
+import subprocess
+
+languages = {
+    'C++': 'cpp',
+    'Java': 'java',
+    'JavaScript': 'js',
+    'Python': 'py'
+}
+
+def submit_code():
+    language = language_var.get()
+    code = code_text.get("1.0", tk.END)
+
+    # Write the code to a file
+    filename = f'code.{languages[language]}'
+    with open(filename, 'w') as file:
+        file.write(code)
+
+    # Compile (if applicable) and run the code
+    try:
+        if language in ['C++', 'Java']:
+            subprocess.run([language.lower(), filename], check=True)
+        elif language == 'JavaScript':
+            subprocess.run(['node', filename], check=True)
+        elif language == 'Python':
+            subprocess.run(['python', filename], check=True)
+        result_area.delete("1.0", tk.END)
+        result_area.insert(tk.END, 'Code compiled and executed successfully.')
+    except subprocess.CalledProcessError as e:
+        error_type = e.__class__.__name__
+        result_area.delete("1.0", tk.END)
+        result_area.insert(tk.END, f'Error: {error_type}\n{e.stderr.decode()}')
+
+# Create the main window
+window = tk.Tk()
+window.title("Code Submission")
+
+# Set the background color
+window.configure(bg='light gray')
+
+# Language selection dropdown
+language_var = tk.StringVar(window)
+language_var.set('C++')
+language_dropdown = tk.OptionMenu(window, language_var, *languages.keys())
+language_dropdown.grid(row=0, column=0)
+
+# Code input text area
+code_text = tk.Text(window, height=10, width=50, bg="white", fg='black')
+code_text.grid(row=1, column=0, padx=10, pady=10)
+
+# Submit button
+submit_button = tk.Button(window, text="Submit", command=submit_code, bg='gray')
+submit_button.grid(row=2, column=0, pady=10)
+
+# Result area
+result_area = tk.Text(window, height=5, width=50, bg='white', fg='black')
+result_area.grid(row=3, column=0, padx=10, pady=10)
+
+# Start the Tkinter event loop
+window.mainloop()
